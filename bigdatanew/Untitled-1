@@ -1,0 +1,105 @@
+import React, { Component } from 'react'
+import $ from 'jquery'
+import Style from './detail.less'
+
+
+export default class Detail extends Component {
+    navList = [{
+        num: 1,
+        score: 1.1,
+        level: '1.1.1',
+        from: '1.1.1.1'
+    },{
+        num: 2, 
+        score: 2.2,
+        level: '2.2.2',
+        from: '2.2.2.2'
+    },{
+        name: 3,
+        score: 3.3,
+        level: '3.3.3',
+        from: '3.3.3.3'
+    }]
+    constructor(props) {
+        super(props)
+        this.state = {
+            active: 0
+        }
+    }
+    componentWillMount() {
+        Style.use()
+        lib.mtop.request({
+            api: 'mtop.alijk.wit120.nodule.dicom.get',
+            v: '1.0',
+            data: {
+                ctCode: this.getctCode()
+            },
+            ecode: 1,
+            type: 'GET',
+            dataType: 'jsonp',
+            //timeout: 20000
+        }).then((json)=>{
+                console.log(json);
+                let list=json.data.result;
+                var template = ''
+                var item = null
+                for (var i = 0; i < list.length; i++) {
+                    item = list[i];
+                    template=template+
+                    '<div class="show-col">'+ 
+                        '<div class="show-col-all">'+
+                        '<a class="show-col-all" href=/detail/?ctcode=' + item.ctCode + '>'+
+                            '<div class="col-sex">'+(item.gender=='1'?'男':'女')+ ' ' + ( item.age+'岁 | 厚度'+item.thickness)+'</div>'+
+                            '<div class="col-num">CT编号:'+item.ctCode+'</div>'+
+                        '</div>'+
+                    '</div>';
+        
+                }
+                $('#list-show').html(template);
+            },(json)=>{
+
+            })
+    }
+    componentWillUnmount() {
+        Style.unuse()
+    }
+    getctCode(){
+        const query = document.location.search.slice(1)
+        return query.split('=')[1]
+    }
+    choose (index) {
+        this.setState{
+            active: index
+        }
+    }
+    render() {
+        const { active } = this.state
+        return ( 
+            <div >
+                <div class="show-top" >CT影像断层扫描图</div>
+                <div class="show-bottom">
+                    <div class="show-left">
+                        <div class="show-left-top">
+                            {
+                                this.navList.map((item, idx) => 
+                                    <div key={idx} class={active == idx ? "active show-part" : 'show-part'} onClick={this.choose(idx)}>
+                                        <div class="show-part-num ">item.num</div>
+                                        <div class="show-part-score ">item.socre</div>
+                                        <div class="show-part-level ">item.level</div>
+                                        <div class="show-part-from ">item.from</div>
+                                        <div class="show-part-line "></div>
+                                    </div>
+                                )
+                            }
+                        </div>
+                        <div class="show-left-buttom"><a href="../肺结节/third.html">查看报告</a></div>
+                    </div>
+                    <div class="show-right">
+                        <div class="show-main">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
